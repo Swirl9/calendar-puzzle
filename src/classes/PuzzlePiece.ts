@@ -206,7 +206,7 @@ export class MoveablePuzzlePiece extends PuzzlePiece implements IMoveable {
             // propagate event under (relative to the viewport) the current element
             let elementsAtPoint = document.elementsFromPoint(e.x, e.y)
             // find the first "square" under the point
-            let square = elementsAtPoint.find(el => el.classList.contains('square'))
+            let square = elementsAtPoint.find(el => el.classList.contains('square') && !el.classList.contains('empty'))
             if (square) {
                 // dispatch the copied event
                 let evt = new MouseEvent(e.type, e)
