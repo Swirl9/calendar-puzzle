@@ -60,15 +60,6 @@ export class Square {
         this.east = temp
     }
 
-    public rotate180() {
-        let temp = this.north
-        this.north = this.south
-        this.south = temp
-        temp = this.west
-        this.west = this.east
-        this.east = temp
-    }
-
     public rotateLeft() {
         let temp = this.north
         this.north = this.east
@@ -77,10 +68,16 @@ export class Square {
         this.west = temp
     }
 
-    public flip() {
+    public flipHorizontally() {
         let temp = this.east
         this.east = this.west
         this.west = temp
+    }
+
+    public flipVertically() {
+        let temp = this.north
+        this.north = this.south
+        this.south = temp
     }
 
     protected sideIsEmpty(side: Space<Square>): boolean {

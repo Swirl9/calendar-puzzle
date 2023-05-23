@@ -20,7 +20,7 @@ export class PuzzlePiece {
         return this.name
     }
 
-    private render(at: Coords = { x: 200, y: 200 }): HTMLElement {
+    protected render(at: Coords = { x: 200, y: 200 }): HTMLElement {
         let container = document.createElement('div')
         container.id = this.name
         container.style.left = `${at.x}px`
@@ -77,15 +77,15 @@ export class PuzzlePiece {
             this.renderInto(this.element.parentElement)
     }
 
-    public rotate180() {
-        this.flattenSquares().forEach(square => square.rotate180())
+    public flipHorizontally() {
+        this.flattenSquares().forEach(square => square.flipHorizontally())
         this.reorder()
         if (this.element && this.element.parentElement)
             this.renderInto(this.element.parentElement)
     }
 
-    public flip() {
-        this.flattenSquares().forEach(square => square.flip())
+    public flipVertically() {
+        this.flattenSquares().forEach(square => square.flipVertically())
         this.reorder()
         if (this.element && this.element.parentElement)
             this.renderInto(this.element.parentElement)
@@ -175,5 +175,66 @@ export class PuzzlePiece {
 
     protected flattenSquares() {
         return this.squares.flat()
+    }
+}
+
+
+interface IMoveable {
+    moving: boolean
+    onmousedown(e: MouseEvent): void
+    onmouseup(e: MouseEvent): void
+}
+
+export class MoveablePuzzlePiece extends PuzzlePiece implements IMoveable {
+    moving = false
+    constructor(pattern: (string | 0)[][], name: string) {
+        super(pattern, name)
+    }
+
+    protected render(at?: Coords) {
+        let el = super.render(at)
+        el.addEventListener('mousedown', this.onmousedown.bind(this))
+        el.addEventListener('mouseup', this.onmouseup.bind(this))
+        // el.addEventListener('mouseleave', this.onmouseup.bind(this))
+        return el
+    }
+
+    onmousedown(e: MouseEvent) {
+        // check if the mousedown happened on an empty square
+        let target = e.target as HTMLElement
+        if (target.classList.contains('empty')) {
+            // propagate event under (relative to the viewport) the current element
+            let elementsAtPoint = document.elementsFromPoint(e.x, e.y)
+            // find the first "square" under the point
+            let square = elementsAtPoint.find(el => el.classList.contains('square'))
+            if (square) {
+                // dispatch the copied event
+                let evt = new MouseEvent(e.type, e)
+                square.dispatchEvent(evt)
+            }
+        } else {
+            // bring to front
+            if (this.element) {
+                // bring to front
+                let parent = this.element.parentElement
+                parent?.append(this.element)
+
+                this.moving = true
+                dispatchEvent(new CustomEvent('puzzle-piece-select', {
+                    detail: {
+                        target: this
+                    }
+                }))
+            }
+        }
+    }
+
+    onmouseup() {
+        this.moving = false
+        dispatchEvent(new CustomEvent('puzzle-piece-unselect', {
+            detail: {
+                target: this
+            }
+        }))
     }
 }

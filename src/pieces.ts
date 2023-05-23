@@ -1,5 +1,4 @@
-import { PuzzlePiece } from "./classes/PuzzlePiece"
-import { MoveablePuzzlePiece } from "./classes/MoveablePuzzlePiece"
+import { PuzzlePiece, MoveablePuzzlePiece } from "./classes/PuzzlePiece"
 
 export const rectanglePiece = new MoveablePuzzlePiece([
     ["", "", ""],

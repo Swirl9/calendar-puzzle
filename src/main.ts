@@ -1,5 +1,5 @@
 import './style.css'
-import { PuzzlePiece } from './classes/PuzzlePiece'
+import { MoveablePuzzlePiece, PuzzlePiece } from './classes/PuzzlePiece'
 import {
   boardPiece,
   tunnelPiece,
@@ -11,6 +11,7 @@ import {
   SPiece,
   thumbPiece
 } from './pieces'
+import { Coords } from './types/types'
 
 let app = document.querySelector('#app') as HTMLElement
 
@@ -33,23 +34,45 @@ randomlyPlace(cornerPiece)
 randomlyPlace(SPiece)
 randomlyPlace(thumbPiece)
 
-let lastPieceMoved: PuzzlePiece
-window.addEventListener("moved", (e: CustomEventInit) => {
-  lastPieceMoved = e.detail?.target
+let selectedPiece: MoveablePuzzlePiece | undefined
+app.addEventListener('mousemove', (e: MouseEvent) => {
+  if (selectedPiece && selectedPiece.element) {
+    // Place the middle of the piece where the cursor is
+    let element = selectedPiece.element
+    let rect = element.getBoundingClientRect()
+    let width = rect.width
+    let height = rect.height
+    let topLeftCorner: Coords = {
+      x: Math.floor(e.x - width / 2),
+      y: Math.floor(e.y - height / 2)
+    }
+    element.style.left = `${topLeftCorner.x}px`
+    element.style.top = `${topLeftCorner.y}px`
+  }
+})
+
+window.addEventListener("puzzle-piece-select", (e: CustomEventInit) => {
+  selectedPiece = e.detail?.target
+})
+
+window.addEventListener("puzzle-piece-unselect", () => {
+  selectedPiece = undefined
 })
 
 window.addEventListener('keydown', (ev: KeyboardEvent) => {
-  if (lastPieceMoved) {
+  if (selectedPiece) {
     switch (ev.key) {
-      case "ArrowRight":
-        lastPieceMoved.rotateRight()
+      case "ArrowDown":
+        selectedPiece.rotateRight()
         break;
       case "ArrowLeft":
-        lastPieceMoved.rotateLeft()
+        selectedPiece.rotateLeft()
         break;
       case "ArrowUp":
-      case "ArrowDown":
-        lastPieceMoved.flip()
+        selectedPiece.flipVertically()
+        break;
+      case "ArrowRight":
+        selectedPiece.flipHorizontally()
         break;
     }
   }
